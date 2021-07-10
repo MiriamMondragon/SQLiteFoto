@@ -3,7 +3,7 @@ package com.example.sqlitefoto;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.widget.GridView;
+import android.widget.ListView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -18,10 +18,10 @@ public class listaImagenes extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_imagenes);
 
-        GridView simpleGridView = (GridView) findViewById(R.id.simpleGridView);
+        ListView simpleGridView = (ListView) findViewById(R.id.listView);
 
         SQLiteConexion help = new SQLiteConexion(this, Transacciones.NameDataBase, null, 1);
-        ArrayList<Item> listaImagenes = new ArrayList<>();
+        ArrayList<Fotografia> listaImagenes = new ArrayList<>();
         Cursor c= help.getAll();
         int i=0;
         if(c.getCount()>0)
@@ -31,9 +31,10 @@ public class listaImagenes extends AppCompatActivity{
             {
 
                 byte[] bytes=c.getBlob(c.getColumnIndex(Transacciones.blobImagen));
+                String descripcion=c.getString(c.getColumnIndex(Transacciones.descripcion));
 
-                Item item = new Item(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
-                listaImagenes.add(item);
+                Fotografia fotografia = new Fotografia(BitmapFactory.decodeByteArray(bytes, 0, bytes.length), descripcion);
+                listaImagenes.add(fotografia);
                 c.moveToNext();
                 i++;
             }

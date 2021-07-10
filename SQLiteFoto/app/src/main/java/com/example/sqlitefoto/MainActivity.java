@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     static final int PETICION_ACCESO_CAM = 100;
     ImageView objImagen;
     SQLiteConexion db;
+    byte[] byteArray;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,10 +37,28 @@ public class MainActivity extends AppCompatActivity {
         objImagen = (ImageView) findViewById(R.id.foto);
         btnFoto = (Button) findViewById(R.id.btnFoto);
         db = new SQLiteConexion(getApplicationContext(), Transacciones.NameDataBase, null, 1);
+        byteArray = new byte[0];
         btnFoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 permisos();
+            }
+        });
+
+        EditText descripcion = (EditText) findViewById(R.id.txtDescripcion);
+        Button btnGuardar = (Button) findViewById(R.id.btnGuardar);
+        btnGuardar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(byteArray.length != 0) {
+                    db.insert(byteArray, descripcion.getText().toString());
+                    Toast.makeText(getApplicationContext(), "Guardado en la Base de Datos", Toast.LENGTH_LONG).show();
+                    byteArray = new byte[0];
+                    objImagen.setImageResource(R.mipmap.ic_launcher_round);
+                    descripcion.setText("");
+                }else{
+                    Toast.makeText(getApplicationContext(), "No se ha tomado ninguna fotografia", Toast.LENGTH_LONG).show();
+                }
             }
         });
 
@@ -78,18 +98,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            guardarBD(data);
+            getBytes(data);
         }
     }
 
-    private void guardarBD(Intent data){
+    private void getBytes(Intent data){
         Bitmap photo = (Bitmap) data.getExtras().get("data");
         objImagen.setImageBitmap(photo);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         photo.compress(Bitmap.CompressFormat.PNG, 100, stream);
-        byte[] byteArray = stream.toByteArray();
-        db.insert(byteArray);
-        Toast.makeText(getApplicationContext(), "Guardado en la Base de Datos", Toast.LENGTH_LONG).show();
+        byteArray = stream.toByteArray();
     }
 
     private void tomarFoto() {
